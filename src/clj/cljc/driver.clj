@@ -1,7 +1,7 @@
 (ns cljc.driver
   (:require [clojure.inspector :as inspector]
             [clojure.java.io :as io]
-	    [clojure.java.shell :as shell]
+            [clojure.java.shell :as shell]
             [cljc.compiler :as cljc]
             [cljc.c-interface :as c]
             [clojure.string :as string])
@@ -318,7 +318,7 @@
   (println "Usage: cljc -c <source-file> <namespace> <out-dir> <exports-dir>")
   (println "            -d <main-fn-name> <out-dir>"))
 
-(defn -main
+(defn -old-main
   [& args]
   (let [[options remaining usage]
         (cli args
@@ -364,3 +364,15 @@
      (do
        (print-usage)
        (System/exit 1)))))
+
+(defn -main
+  [& args]
+  ;;(compile-file-to-dirs source namespace out-dir exports-dir)
+  ;;(compile-file-to-dirs source namespace out-dir exports-dir)
+  (compile-file-to-dirs "src/cljc/cljc/core.cljc" (symbol "cljc.core") "run" "run")
+  (compile-file-to-dirs "samples/echo.cljc"       (symbol "cljc.user") "run" "run")
+  (spit-driver nil (symbol "cljc.user" "-main") true "run")
+
+  (shell/with-sh-dir "run"
+                     (shell/sh "make", "-f", "c/Makefile")))
+
